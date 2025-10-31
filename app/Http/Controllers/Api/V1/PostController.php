@@ -11,7 +11,6 @@ use App\Http\Requests\V1\PostUpdateRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Events\PostChanged;
 use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -40,13 +39,9 @@ class PostController extends Controller
 
         $validated = $request->validated();
 
-        $post = DB::transaction(function () use ($request, $validated) {
-            $post = $request->user()->posts()->create($validated);
+        $post = $request->user()->posts()->create($validated);
 
-            broadcast(new PostChanged('created', $post));
-
-            return $post;
-        });
+        broadcast(new PostChanged('created', $post));
 
         return response()->json([
             'success' => true,
@@ -77,13 +72,10 @@ class PostController extends Controller
         $this->authorize('update', $post);
 
         $validated = $request->validated();
+ 
+        $post->update($validated);
 
-        $post = DB::transaction(function () use ($post, $validated) {
-            $post->update($validated);
-
-            broadcast(new PostChanged('updated', $post));
-            return $post;
-        });
+        broadcast(new PostChanged('updated', $post));
 
         return response()->json([
             'success' => true,
@@ -99,11 +91,9 @@ class PostController extends Controller
     {
         $this->authorize('delete', $post);
 
-        $post = DB::transaction(function () use ($post) {
-            $post->delete();
+        $post->delete();
 
-            broadcast(new PostChanged('deleted', $post));
-        });
+        broadcast(new PostChanged('deleted', $post));
 
         return response()->json([
             'success' => true,
