@@ -16,11 +16,13 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
-        Route::get('/tickets', [TicketController::class, 'index']);
+        /* Route::get('/tickets', [TicketController::class, 'index']);
         Route::post('/tickets', [TicketController::class, 'store']);
         Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
         Route::put('/tickets/{ticket}', [TicketController::class, 'update']);
-        Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy']);
+        Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy']); */
+
+        Route::apiResource('tickets', TicketController::class);
         Route::put('/tickets/{ticket}/lease', [TicketLeaseController::class, 'lease']);
         Route::post('/tickets/{ticket}/comments', [CommentController::class, 'addComment']);
         Route::get('/tickets/{ticket}/comments', [CommentController::class, 'getComments']);
