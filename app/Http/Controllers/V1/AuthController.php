@@ -23,10 +23,7 @@ class AuthController extends ApiController
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return $this->createdResponse([
-            'user' => UserResource::make($user)->resolve(),
-            'token' => $token
-        ], 'Registered Successfully');
+        return $this->createdResponse(new UserResource($user, $token), 'Registered Successfully');
     }
 
     public function login(AuthLoginRequest $request) {
@@ -40,10 +37,7 @@ class AuthController extends ApiController
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return $this->successResponse([
-            'user' => UserResource::make($user)->resolve(),
-            'token' => $token
-        ], 'Login Successfully', 200);
+        return $this->successResponse(new UserResource($user, $token), 'Login Successfully', 200);
     }
 
     public function logout(Request $request) {

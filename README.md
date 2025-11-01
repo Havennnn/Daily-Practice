@@ -1,6 +1,12 @@
 
 # Ticket Mangement
 
+## Model and Migration
+
+User - name, email, password
+Ticket - creator_id(user_id), leased_to_id(user_id), title, description, status, priority
+Comment - user_id, content
+
 ## Response Shape
 
 For Success:

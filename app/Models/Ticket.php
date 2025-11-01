@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
+        'leased_to_id',
         'title',
         'description',
         'status',
@@ -14,11 +18,11 @@ class Ticket extends Model
     ];
 
     public function creator() {
-        return $this->belongsToMany(User::class, 'creator_id');
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
     public function lessee() {
-        return $this->belongsToMany(User::class, 'leased_to_id');
+        return $this->belongsTo(User::class, 'leased_to_id');
     }
 
     public function comments() {

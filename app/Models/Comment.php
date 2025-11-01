@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     protected $fillable = [
-        'content'
+        'content',
+        'user_id'
     ];
 
     public function user() {
-        return $this->belongTo(User::class);
+        return $this->belongsTo(User::class);
     }
 
     public function ticket() {

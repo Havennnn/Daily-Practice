@@ -4,6 +4,8 @@ namespace App\Traits;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Collection;
 
 use function PHPUnit\Framework\isNull;
@@ -17,16 +19,30 @@ trait ApiResponse
         ];
 
         if(! is_null($data)) {
-            if ($data instanceof LengthAwarePaginator) {
-                $payload['data'] = $data->items();
-                $payload['meta'] = [
-                    'current_page' => $data->currentPage(),
-                    'last_page'    => $data->lastPage(),
-                    'per_page'     => $data->perPage(),
-                    'total'        => $data->total(),
-                ];
-            } else {
-                $payload['data'] = $data;
+            if ($data instanceof AnonymousResourceCollection) {
+                $array = $data->response()->getData(true);
+                $payload['data'] = $array['data'] ?? [];
+
+                if (isset($array['meta'])) {
+                    $meta = $array['meta'];
+                    $links = $array['links'];
+                    $trimmed = [
+                        'current_page' => $meta['current_page'] ?? null,
+                        'last_page' => $meta['last_page'] ?? null,
+                        'per_page' => $meta['per_page'] ?? null,
+                        'total' => $meta['total'] ?? null,
+                        'next_page' => $links['next'] ?? null,
+                        'prev_page' => $links['prev'] ?? null
+                    ];
+
+                    $payload['meta'] = $trimmed;
+                }
+                return response()->json($payload, $status);
+            }
+
+            if ($data instanceof JsonResource) {
+                $payload['data'] = $data->resolve();
+                return response()->json($payload, $status);
             }
         }
 
