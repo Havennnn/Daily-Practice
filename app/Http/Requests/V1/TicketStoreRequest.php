@@ -24,7 +24,7 @@ class TicketStoreRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'status' => 'sometimes|in:open_in,in_progress,on_hold,closed',
+            'status' => 'sometimes|in:open,in_progress,on_hold,closed',
             'priority' => 'sometimes|in:low,medium,high,urgent'
         ];
     }

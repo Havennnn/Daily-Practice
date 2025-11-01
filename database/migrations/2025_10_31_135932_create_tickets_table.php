@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('leased_to_id')->nullable()->constrined('users')->nullOnDelete();
+            $table->foreignId('leased_to_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title', 255);
             $table->text('description');
             $table->enum('status', ['open','in_progress','on_hold','closed'])->default('open');

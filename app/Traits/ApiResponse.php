@@ -8,8 +8,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Collection;
 
-use function PHPUnit\Framework\isNull;
-
 trait ApiResponse
 {
     protected function successResponse(mixed $data = null, string $message = 'Success', int $status = 200) : JsonResponse{
@@ -59,7 +57,7 @@ trait ApiResponse
 
     protected function errorResponse(string $message = 'Error', array|object|null $errors = null, int $status = 400) : JsonResponse {
         $payload = [
-            'success' => true,
+            'success' => false,
             'message' => $message
         ];
 
