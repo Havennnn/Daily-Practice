@@ -4,15 +4,13 @@ namespace App\Http\Controllers\V1;
 
 use App\Models\Ticket;
 use App\Http\Controllers\V1\ApiController;
-use App\Http\Requests\V1\TicketCommentRequest;
-use App\Http\Requests\V1\TicketLeaseRequest;
 use App\Http\Requests\V1\TicketStoreRequest;
 use App\Http\Requests\V1\TicketUpdateRequest;
-use App\Http\Resources\CommentResource;
 use App\Http\Resources\TicketResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Cache;
 
 class TicketController extends ApiController
 {
@@ -23,13 +21,24 @@ class TicketController extends ApiController
      */
     public function index(Request $request) : JsonResponse
     {
-        $tickets = Ticket::with(['creator', 'lessee'])
-            ->where('creator_id', $request->user()->id)
-            ->orWhere('leased_to_id', $request->user()->id)
-            ->latest()
-            ->paginate(2);
+        $id = $request->user()->id;
+        $pages = (int) $request->get('page', 1);
 
-        return $this->successResponse(TicketResource::collection($tickets, 'index'), 'All Related Tickets Retrieved Successfully');
+        $cacheKey = sprintf('user:%d:tickets:page:%d', $id, $pages);
+
+        $tickets = Cache::remember($cacheKey, now()->addMinutes(1), function () use ($id) {
+            return Ticket::with(['creator', 'lessee'])
+                        ->where(fn ($att) => 
+                            $att->where('creator_id', $id)
+                                ->orWhere('leased_to_id', $id))
+                        ->latest()
+                        ->paginate(10);
+        });
+
+        return $this->successResponse(
+            TicketResource::collection($tickets, 'index'), 
+            'All Related Tickets Retrieved Successfully'
+        );
     }
 
     /**
@@ -37,13 +46,14 @@ class TicketController extends ApiController
      */
     public function store(TicketStoreRequest $request) : JsonResponse
     {
-        $validated = $request->validated();
+        $ticket = $request->user()->createdTickets()->create($request->validated())->refresh();
 
-        $ticket = $request->user()->createdTickets()->create($validated);
+        Cache::flush();
 
-        $ticket = $ticket->refresh();
-
-        return $this->createdResponse(new TicketResource($ticket, 'store'), 'Ticket Created Sucessfully');
+        return $this->createdResponse(
+            new TicketResource($ticket, 'store'), 
+            'Ticket Created Sucessfully'
+        );
     }
 
     /**
@@ -51,7 +61,12 @@ class TicketController extends ApiController
      */
     public function show(Ticket $ticket) : JsonResponse
     {
-        return $this->successResponse(new TicketResource($ticket, 'show'), 'Ticket Retrieved Sucessfully');
+        $this->authorize('view', $ticket);
+
+        return $this->successResponse(
+            new TicketResource($ticket, 'show'),
+            'Ticket Retrieved Sucessfully'
+        );
     }
 
     /**
@@ -61,13 +76,15 @@ class TicketController extends ApiController
     {
         $this->authorize('update', $ticket);
 
-        $validated = $request->validated();
-
-        $ticket->update($validated);
-
+        $ticket->update($request->validated());
         $ticket->refresh();
 
-        return $this->successResponse(new TicketResource($ticket, 'update'), 'Ticket Updated Sucessfully');
+        Cache::flush();
+
+        return $this->successResponse(
+            new TicketResource($ticket, 'update'), 
+            'Ticket Updated Sucessfully'
+        );
     }
 
     /**
@@ -79,6 +96,11 @@ class TicketController extends ApiController
 
         $ticket->delete();
 
-        return $this->successResponse(null, 'Ticket Deleted Sucessfully');
+        Cache::flush();
+
+        return $this->successResponse(
+            null, 
+            'Ticket Deleted Sucessfully'
+        );
     }
 }

@@ -23,7 +23,10 @@ class AuthController extends ApiController
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return $this->createdResponse(new UserResource($user, $token), 'Registered Successfully');
+        return $this->createdResponse(
+            new UserResource($user, $token), 
+            'Registered Successfully'
+        );
     }
 
     public function login(AuthLoginRequest $request) {
@@ -32,12 +35,18 @@ class AuthController extends ApiController
         $user = User::where('email', $validated['email'])->first();
 
         if(! $user || ! Hash::check($validated['password'], $user->password)) {
-            return $this->errorResponse('Invalid Credentials', null, 401);
+            return $this->errorResponse(
+                'Invalid Credentials', 
+                null, 401
+            );
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return $this->successResponse(new UserResource($user, $token), 'Login Successfully', 200);
+        return $this->successResponse(
+            new UserResource($user, $token),
+            'Login Successfully'
+        );
     }
 
     public function logout(Request $request) {
@@ -45,9 +54,15 @@ class AuthController extends ApiController
 
         if ($token) {
             $token->delete();
-            return $this->successResponse(null, 'Logout Successfully', 200);
+            return $this->successResponse(
+                null,
+                'Logout Successfully'
+            );
         }
 
-        return $this->errorResponse('No active token found', null, 401);
+        return $this->errorResponse(
+            'No active token found', 
+            null, 401
+        );
     }
 }

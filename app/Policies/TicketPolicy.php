@@ -21,7 +21,7 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        return true
+        return true;
     }
 
     /**
@@ -68,6 +68,11 @@ class TicketPolicy
      * Determine whether the user can lease the model.
      */
     public function lease(User $user, Ticket $ticket): bool
+    {
+        return $user->id == $ticket->creator_id;
+    }
+
+    public function unlease(User $user, Ticket $ticket): bool
     {
         return $user->id == $ticket->creator_id;
     }

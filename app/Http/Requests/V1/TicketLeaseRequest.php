@@ -22,7 +22,7 @@ class TicketLeaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'leased_to_id' => 'nullable|int|exists:users,id'
+            'leased_to_id' => 'required|int|exists:users,id'
         ];
     }
 }

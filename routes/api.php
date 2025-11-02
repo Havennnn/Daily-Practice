@@ -24,7 +24,8 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('tickets', TicketController::class);
         Route::put('/tickets/{ticket}/lease', [TicketLeaseController::class, 'lease']);
-        Route::post('/tickets/{ticket}/comments', [CommentController::class, 'addComment']);
-        Route::get('/tickets/{ticket}/comments', [CommentController::class, 'getComments']);
+        Route::put('/tickets/{ticket}/unlease', [TicketLeaseController::class, 'unlease']);
+        Route::post('/tickets/{ticket}/comments', [CommentController::class, 'store']);
+        Route::get('/tickets/{ticket}/comments', [CommentController::class, 'index']);
     });
 });
